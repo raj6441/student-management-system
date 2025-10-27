@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet App - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to your wallet account</p>
+            
+            <div id="message" class="alert" style="display: none;"></div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required 
+                           placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="register.html">Sign up here</a></p>
+            </div>
+            
+            <div class="demo-credentials" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; font-size: 14px;">
+                <h4>Demo Credentials:</h4>
+                <p><strong>Admin:</strong> username: admin, password: admin123</p>
+                <p><strong>User:</strong> username: john_doe, password: password123</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock login functionality for demo
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Demo authentication
+            if ((username === 'admin' && password === 'admin123') || 
+                (username === 'john_doe' && password === 'password123')) {
+                
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = 'Login successful! Redirecting to dashboard...';
+                messageDiv.style.display = 'block';
+                
+                // Store user info in localStorage for demo
+                localStorage.setItem('currentUser', JSON.stringify({
+                    username: username,
+                    fullName: username === 'admin' ? 'Administrator' : 'John Doe',
+                    balance: username === 'admin' ? 1000.00 : 500.00
+                }));
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+                
+            } else {
+                messageDiv.className = 'alert alert-error';
+                messageDiv.textContent = 'Invalid username or password';
+                messageDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

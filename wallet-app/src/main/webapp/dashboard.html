@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet App - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-brand">Wallet App</h1>
+            <div class="nav-menu">
+                <span class="nav-user" id="welcomeUser">Welcome, User</span>
+                <a href="transaction.html?action=deposit" class="nav-link">Deposit</a>
+                <a href="transaction.html?action=withdraw" class="nav-link">Withdraw</a>
+                <a href="transaction.html?action=transfer" class="nav-link">Transfer</a>
+                <a href="#" onclick="logout()" class="nav-link">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Wallet Balance Card -->
+        <div class="balance-card">
+            <h2>Current Balance</h2>
+            <div class="balance-amount" id="balanceAmount">$0.00</div>
+            <p class="balance-currency">USD</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="action-buttons">
+                <a href="transaction.html?action=deposit" class="btn btn-success">
+                    <span class="btn-icon">💰</span>
+                    Deposit Money
+                </a>
+                <a href="transaction.html?action=withdraw" class="btn btn-warning">
+                    <span class="btn-icon">💸</span>
+                    Withdraw Money
+                </a>
+                <a href="transaction.html?action=transfer" class="btn btn-info">
+                    <span class="btn-icon">🔄</span>
+                    Transfer Money
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="transactions-section">
+            <h3>Recent Transactions</h3>
+            <div id="transactionsList" class="transactions-list">
+                <!-- Transactions will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        // Display user info
+        document.getElementById('welcomeUser').textContent = `Welcome, ${currentUser.fullName}`;
+        document.getElementById('balanceAmount').textContent = `$${currentUser.balance.toFixed(2)}`;
+
+        // Load transactions from localStorage
+        function loadTransactions() {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            const transactionsList = document.getElementById('transactionsList');
+            
+            if (transactions.length === 0) {
+                transactionsList.innerHTML = `
+                    <div class="empty-state">
+                        <p>No transactions yet. Start by making a deposit!</p>
+                        <a href="transaction.html?action=deposit" class="btn btn-primary">Make First Deposit</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show recent transactions (last 10)
+            const recentTransactions = transactions.slice(-10).reverse();
+            transactionsList.innerHTML = recentTransactions.map(transaction => {
+                const isPositive = transaction.type === 'CREDIT' || transaction.type === 'TRANSFER_IN';
+                const icon = {
+                    'CREDIT': '⬇️',
+                    'DEBIT': '⬆️',
+                    'TRANSFER_IN': '⬅️',
+                    'TRANSFER_OUT': '➡️'
+                }[transaction.type];
+                
+                const typeText = {
+                    'CREDIT': 'Deposit',
+                    'DEBIT': 'Withdrawal',
+                    'TRANSFER_IN': 'Transfer In',
+                    'TRANSFER_OUT': 'Transfer Out'
+                }[transaction.type];
+
+                return `
+                    <div class="transaction-item ${transaction.type.toLowerCase()}">
+                        <div class="transaction-info">
+                            <div class="transaction-type">
+                                <span class="transaction-icon">${icon}</span>
+                                <span class="transaction-label">${typeText}</span>
+                            </div>
+                            <div class="transaction-description">${transaction.description}</div>
+                            <div class="transaction-date">${new Date(transaction.date).toLocaleString()}</div>
+                        </div>
+                        <div class="transaction-amount">
+                            <span class="${isPositive ? 'amount-positive' : 'amount-negative'}">
+                                ${isPositive ? '+' : '-'}$${Math.abs(transaction.amount).toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('transactions');
+            window.location.href = 'index.html';
+        }
+
+        // Load transactions on page load
+        loadTransactions();
+
+        // Add some sample transactions if none exist
+        if (!localStorage.getItem('transactions')) {
+            const sampleTransactions = [
+                {
+                    type: 'CREDIT',
+                    amount: currentUser.username === 'admin' ? 1000.00 : 500.00,
+                    description: currentUser.username === 'admin' ? 'Initial deposit' : 'Welcome bonus',
+                    date: new Date().toISOString(),
+                    reference: 'TXN' + Date.now()
+                }
+            ];
+            localStorage.setItem('transactions', JSON.stringify(sampleTransactions));
+            loadTransactions();
+        }
+    </script>
+</body>
+</html>
